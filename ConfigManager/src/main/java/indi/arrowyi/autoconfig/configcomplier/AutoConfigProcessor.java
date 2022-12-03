@@ -19,7 +19,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 @AutoService(Processor.class)
-@SupportedSourceVersion(SourceVersion.RELEASE_11)
+@SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({"indi.arrowyi.autoconfig.AutoConfig"
         , "indi.arrowyi.autoconfig.AutoRegisterToDefault"})
 public class AutoConfigProcessor extends AbstractProcessor {
