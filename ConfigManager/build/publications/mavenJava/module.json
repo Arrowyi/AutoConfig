@@ -1,0 +1,76 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "indi.arrowyi",
+    "module": "AutoConfig",
+    "version": "1.1",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "7.4"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 11,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api"
+      },
+      "files": [
+        {
+          "name": "AutoConfig-1.1.jar",
+          "url": "AutoConfig-1.1.jar",
+          "size": 30262,
+          "sha512": "8f33d2dcd65e618904f35a089a8ed50845c471b7e92c50019e389f8ee3670d371e5d3cc2d53da8db038f2a58bf741796b206542991fcd4b9dba78aab5da7edb8",
+          "sha256": "b0e67ca79e4b6eca07993f42190c30c69f5c9317286a61520b9437011f3678a9",
+          "sha1": "f7eb1f0258391cacde7c50bd99a6feb34a36ef16",
+          "md5": "c75ad17d9035da427ac6193d8cf6b250"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 11,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "dependencies": [
+        {
+          "group": "com.google.auto.service",
+          "module": "auto-service",
+          "version": {
+            "requires": "1.0-rc7"
+          }
+        },
+        {
+          "group": "com.squareup",
+          "module": "javapoet",
+          "version": {
+            "requires": "1.12.1"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "AutoConfig-1.1.jar",
+          "url": "AutoConfig-1.1.jar",
+          "size": 30262,
+          "sha512": "8f33d2dcd65e618904f35a089a8ed50845c471b7e92c50019e389f8ee3670d371e5d3cc2d53da8db038f2a58bf741796b206542991fcd4b9dba78aab5da7edb8",
+          "sha256": "b0e67ca79e4b6eca07993f42190c30c69f5c9317286a61520b9437011f3678a9",
+          "sha1": "f7eb1f0258391cacde7c50bd99a6feb34a36ef16",
+          "md5": "c75ad17d9035da427ac6193d8cf6b250"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+rootProject.name = 'AutoConfig'
+include ':ConfigManager'
+include ':Tester'
+
+project(':ConfigManager').projectDir = new File(rootProject.projectDir, "./ConfigManager")
+
+project(':Tester').projectDir = new File(rootProject.projectDir, "./Tester")
+
+
