@@ -1,0 +1,38 @@
+apply plugin: 'maven-publish'
+
+publishing {
+    repositories {
+        mavenLocal()
+    }
+
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = 'indi.arrowyi'
+            artifactId = 'AutoConfig'
+            version = '1.1'
+
+            from components.java
+
+//            pom.withXml {
+//                //处理多渠道
+//                def dependenciesNode = asNode().appendNode('dependencies')
+//                configurations.each {
+//                    it.allDependencies.each { dependency ->
+//                        //通过本地引用的不要打进去
+//                        if (dependency.name != "unspecified") {
+//                            println(">>>>" + dependency.name)
+//                            def dependencyNode = dependenciesNode.appendNode('dependency')
+//                            dependencyNode.appendNode('groupId', dependency.group)
+//                            dependencyNode.appendNode('artifactId', dependency.name)
+//                            dependencyNode.appendNode('version', dependency.version)
+//                            dependencyNode.appendNode('scope', it.name)
+//                        }
+//                    }
+//                }
+//            }
+        }
+
+    }
+
+
+}
