@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2022.  Arrowyi. All rights reserved
  * email : arrowyi@gmail.com
@@ -15,9 +14,7 @@
  *    limitations under the License.
  */
 
-package indi.arrowyi.autoconfig.configmanager;
+package indi.arrowyi.autoconfig;
 
-
-public interface ConfigRegister {
-    void register(AutoConfig config);
+public @interface AutoRegisterBooleanWithDefault {
 }

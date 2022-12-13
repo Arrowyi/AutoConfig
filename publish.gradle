@@ -9,7 +9,7 @@ publishing {
         mavenJava(MavenPublication) {
             groupId = 'indi.arrowyi'
             artifactId = 'AutoConfig'
-            version = '1.1'
+            version = '1.0'
 
             from components.java
 

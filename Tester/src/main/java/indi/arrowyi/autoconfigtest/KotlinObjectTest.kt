@@ -1,8 +1,8 @@
 package indi.arrowyi.autoconfigtest
 
-import indi.arrowyi.autoconfig.AutoRegister
+import indi.arrowyi.autoconfig.AutoRegisterString
 
 object KotlinObjectTest {
-    @AutoRegister(type = AutoRegister.Type.STRING, defaultValue = "object test")
+    @AutoRegisterString(defaultValue = "object test")
     const val OBJ_TEST = "OBJ_TEST"
 }

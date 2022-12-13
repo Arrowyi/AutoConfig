@@ -1,3 +1,20 @@
+
+/*
+ * Copyright (c) 2022.  Arrowyi. All rights reserved
+ * email : arrowyi@gmail.com
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
 package indi.arrowyi.autoconfig.configmanager;
 
 import java.util.ArrayList;
@@ -129,17 +146,50 @@ public final class AutoConfig {
         sInstance.doRegisterDefaultValueLoader(name, loader);
     }
 
-    public static void register(String key, AutoConfig.Type type, String accessor, String defaultLoader
-            , String defaultValue) {
-        sInstance.doRegister(key, type, accessor, defaultLoader, defaultValue);
+    public static void registerInt(String key, String accessor, String defaultLoader
+            , int defaultValue) {
+        sInstance.doRegister(key, Type.INT, accessor, defaultLoader, Integer.valueOf(defaultValue));
+    }
+
+    public static void registerLong(String key, String accessor, String defaultLoader
+            , long defaultValue) {
+        sInstance.doRegister(key, Type.LONG, accessor, defaultLoader, Long.valueOf(defaultValue));
+    }
+
+    public static void registerBoolean(String key, String accessor, String defaultLoader
+            , boolean defaultValue) {
+        sInstance.doRegister(key, Type.BOOLEAN, accessor, defaultLoader, Boolean.valueOf(defaultValue));
+    }
+
+    public static void registerFloat(String key, String accessor, String defaultLoader
+            , float defaultValue) {
+        sInstance.doRegister(key, Type.FLOAT, accessor, defaultLoader, Float.valueOf(defaultValue));
+    }
+
+    public static void registerDouble(String key, String accessor, String defaultLoader
+            , double defaultValue) {
+        sInstance.doRegister(key, Type.DOUBLE, accessor, defaultLoader, Double.valueOf(defaultValue));
+    }
+
+    public static void registerString(String key, String accessor, String defaultLoader
+            , Object defaultValue) {
+        sInstance.doRegister(key, Type.STRING, accessor, defaultLoader, (String) defaultValue);
     }
 
     public static boolean set(String key, Object value) {
         return sInstance.doSet(key, value);
     }
 
+    public static boolean setInt(String key, int value) {
+        return set(key, Integer.valueOf(value));
+    }
+
     public static Object get(String key) {
         return sInstance.doGet(key);
+    }
+
+    public static int getInt(String key) {
+        return (Integer) get(key);
     }
 
     public static boolean isKeyDefined(String key) {
@@ -169,7 +219,8 @@ public final class AutoConfig {
 
         if (listeners == null) {
             if (!steward.isKeyDefined(key)) {
-                throw new ConfigRuntimeException("key : " + key + " has not been defined in settings yet !!!");
+                ConfigLog.e("key : " + key + " has not been defined in settings yet !!!");
+                return;
             }
 
             listeners = new ArrayList<>();
@@ -200,7 +251,7 @@ public final class AutoConfig {
     }
 
     private void doRegister(String key, AutoConfig.Type type, String accessor, String defaultLoader
-            , String defaultValue) {
+            , Object defaultValue) {
         steward.register(key, type, accessor, defaultLoader, defaultValue, false);
     }
 
@@ -216,7 +267,8 @@ public final class AutoConfig {
                 return true;
             }
             default:
-                throw new ConfigRuntimeException("setValue wrong res");
+                ConfigLog.e("setValue wrong res");
+                return false;
         }
     }
 

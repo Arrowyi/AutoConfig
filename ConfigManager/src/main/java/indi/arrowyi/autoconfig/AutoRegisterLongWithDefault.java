@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2022.  Arrowyi. All rights reserved
  * email : arrowyi@gmail.com
@@ -15,9 +14,14 @@
  *    limitations under the License.
  */
 
-package indi.arrowyi.autoconfig.configmanager;
+package indi.arrowyi.autoconfig;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public interface ConfigRegister {
-    void register(AutoConfig config);
+@Target(ElementType.FIELD)
+@Retention(RetentionPolicy.SOURCE)
+public @interface AutoRegisterLongWithDefault {
 }

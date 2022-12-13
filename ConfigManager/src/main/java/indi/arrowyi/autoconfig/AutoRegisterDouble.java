@@ -15,9 +15,17 @@
  *    limitations under the License.
  */
 
-package indi.arrowyi.autoconfig.configmanager;
+package indi.arrowyi.autoconfig;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public interface ConfigRegister {
-    void register(AutoConfig config);
+@Target(ElementType.FIELD)
+@Retention(RetentionPolicy.SOURCE)
+public @interface AutoRegisterDouble{
+    double defaultValue() default 0.0;
+    String accessor() default "";
+    String defaultLoader() default "";
 }

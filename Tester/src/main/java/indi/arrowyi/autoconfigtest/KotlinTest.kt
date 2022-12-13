@@ -1,18 +1,19 @@
 package indi.arrowyi.autoconfigtest
 
-import indi.arrowyi.autoconfig.AutoRegister
-import indi.arrowyi.autoconfig.AutoRegisterToDefault
+import indi.arrowyi.autoconfig.AutoRegisterInt
+import indi.arrowyi.autoconfig.AutoRegisterString
 import indi.arrowyi.autoconfig.configmanager.AutoConfig
 
 
-@AutoRegisterToDefault(type = AutoRegister.Type.STRING)
+@AutoRegisterString(defaultValue = "kotlin")
 const val KOLINT_TEST : String  = "KOLINT_TEST"
 
 class KotlinTest {
     companion object{
-        @AutoRegisterToDefault(type = AutoRegister.Type.INT, defaultValue = "1")
+        @AutoRegisterInt(defaultValue = 6)
         const val KOTLIN_COMPANION = "KOLINT_COM_TEST"
     }
+
     fun main(){
         println("test String is ${AutoConfig.get(KOLINT_TEST)}")
     }

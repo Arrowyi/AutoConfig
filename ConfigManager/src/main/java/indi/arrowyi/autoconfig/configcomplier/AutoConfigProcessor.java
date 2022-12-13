@@ -1,9 +1,24 @@
+/*
+ * Copyright (c) 2022.  Arrowyi. All rights reserved
+ * email : arrowyi@gmail.com
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
 package indi.arrowyi.autoconfig.configcomplier;
 
 import com.google.auto.service.AutoService;
 import com.squareup.javapoet.*;
-import indi.arrowyi.autoconfig.AutoRegister;
-import indi.arrowyi.autoconfig.AutoRegisterToDefault;
+import indi.arrowyi.autoconfig.*;
 import indi.arrowyi.autoconfig.configmanager.AutoConfig;
 
 import javax.annotation.processing.*;
@@ -18,20 +33,44 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
+import static indi.arrowyi.autoconfig.configmanager.AutoConfig.DEFAULT_ACCESSOR;
+import static indi.arrowyi.autoconfig.configmanager.AutoConfig.DEFAULT_LOADER;
+
 @AutoService(Processor.class)
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
-@SupportedAnnotationTypes({"indi.arrowyi.autoconfig.AutoConfig"
-        , "indi.arrowyi.autoconfig.AutoRegisterToDefault"})
+@SupportedAnnotationTypes({"indi.arrowyi.autoconfig.AutoRegisterInt"
+        , "indi.arrowyi.autoconfig.AutoRegisterLong"
+        , "indi.arrowyi.autoconfig.AutoRegisterDouble"
+        , "indi.arrowyi.autoconfig.AutoRegisterFloat"
+        , "indi.arrowyi.autoconfig.AutoRegisterBoolean"
+        , "indi.arrowyi.autoconfig.AutoRegisterString"
+        , "indi.arrowyi.autoconfig.AutoRegisterIntWithDefault"
+        , "indi.arrowyi.autoconfig.AutoRegisterLongWithDefault"
+        , "indi.arrowyi.autoconfig.AutoRegisterFloatWithDefault"
+        , "indi.arrowyi.autoconfig.AutoRegisterDoubleWithDefault"
+        , "indi.arrowyi.autoconfig.AutoRegisterStringWithDefault"
+        , "indi.arrowyi.autoconfig.AutoRegisterBooleanWithDefault"})
 public class AutoConfigProcessor extends AbstractProcessor {
+
+    enum Type {
+        BOOLEAN,
+        INT,
+        FLOAT,
+        DOUBLE,
+        STRING,
+        LONG
+    }
+
     private static class ConfigItemInfo {
         String key;
-        AutoRegister.Type type;
-        String defaultValue;
+        Type type;
+        Object defaultValue;
         String accessor;
         String defaultLoader;
     }
 
     private List<ConfigItemInfo> items = new ArrayList<>();
+
 
     @Override
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
@@ -52,96 +91,210 @@ public class AutoConfigProcessor extends AbstractProcessor {
 
     private boolean processCommonSettings(RoundEnvironment roundEnvironment) {
         boolean res = false;
-        Set<? extends Element> elements = roundEnvironment.getElementsAnnotatedWith(AutoRegister.class);
-        printMessageW("elements size is " + elements.size());
+        Set<? extends Element> elementsInt = roundEnvironment.getElementsAnnotatedWith(AutoRegisterInt.class);
+        printMessageW("elementsInt size is " + elementsInt.size());
 
-        Set<? extends Element> elements1 = roundEnvironment.getElementsAnnotatedWith(AutoRegisterToDefault.class);
-        printMessageW("elements1 size is " + elements1.size());
+        Set<? extends Element> elementsLong = roundEnvironment.getElementsAnnotatedWith(AutoRegisterLong.class);
+        printMessageW("elementsLong size is " + elementsLong.size());
+
+        Set<? extends Element> elementsBoolean = roundEnvironment.getElementsAnnotatedWith(AutoRegisterBoolean.class);
+        printMessageW("elementsBoolean size is " + elementsBoolean.size());
+
+        Set<? extends Element> elementsFloat = roundEnvironment.getElementsAnnotatedWith(AutoRegisterFloat.class);
+        printMessageW("elementsFloat size is " + elementsFloat.size());
+
+        Set<? extends Element> elementsDouble = roundEnvironment.getElementsAnnotatedWith(AutoRegisterDouble.class);
+        printMessageW("elementsDouble size is " + elementsDouble.size());
+
+        Set<? extends Element> elementsString = roundEnvironment.getElementsAnnotatedWith(AutoRegisterString.class);
+        printMessageW("elementsString size is " + elementsString.size());
+
+
+        Set<? extends Element> elementsIntDefault = roundEnvironment.getElementsAnnotatedWith(AutoRegisterIntWithDefault.class);
+        printMessageW("elementsIntDefault size is " + elementsIntDefault.size());
+
+        Set<? extends Element> elementsLongDefault = roundEnvironment.getElementsAnnotatedWith(AutoRegisterLongWithDefault.class);
+        printMessageW("elementsLongDefault size is " + elementsLongDefault.size());
+
+        Set<? extends Element> elementsFloatDefault = roundEnvironment.getElementsAnnotatedWith(AutoRegisterFloatWithDefault.class);
+        printMessageW("elementsFloatDefault size is " + elementsFloatDefault.size());
+
+        Set<? extends Element> elementsDoubleDefault = roundEnvironment.getElementsAnnotatedWith(AutoRegisterDoubleWithDefault.class);
+        printMessageW("elementsDoubleDefault size is " + elementsDoubleDefault.size());
+
+        Set<? extends Element> elementsBooleanDefault = roundEnvironment.getElementsAnnotatedWith(AutoRegisterBooleanWithDefault.class);
+        printMessageW("elementsBooleanDefault size is " + elementsBooleanDefault.size());
+
+        Set<? extends Element> elementsStringDefault = roundEnvironment.getElementsAnnotatedWith(AutoRegisterStringWithDefault.class);
+        printMessageW("elementsStringDefault size is " + elementsStringDefault.size());
 
         printMessageW("items size is " + items.size());
 
 
-        if (elements != null || elements.size() > 0) {
-            res |= handleAutoRegister(elements, (VariableElement variableElement) -> {
-                ConfigItemInfo configItemInfo = new ConfigItemInfo();
-
-                String key = variableElement.getConstantValue().toString();
-                AutoRegister annotation = variableElement.getAnnotation(AutoRegister.class);
-
-                if(annotation == null){
-                    printMessageW("get AutoRegister is null");
+        if (elementsInt != null && elementsInt.size() > 0) {
+            res |= handleAutoRegister(elementsInt, (VariableElement variableElement) -> {
+                AutoRegisterInt annotation = variableElement.getAnnotation(AutoRegisterInt.class);
+                if (annotation == null) {
+                    printMessageW("get AutoRegisterInt is null");
                     return null;
                 }
-                AutoRegister.Type type = annotation.type();
-                String accessor = annotation.accessor();
-                String defaultValue = annotation.defaultValue();
-                String defaultLoader = annotation.defaultLoader();
-
-                if (key == null || key.isEmpty()) {
-                    printMessageE("handleAutoConfigRegister : the element's value is null --> " + variableElement.getSimpleName());
-                    return null;
-                }
-
-                configItemInfo.key = key;
-                configItemInfo.type = type;
-
-                if (accessor != null ) {
-                    configItemInfo.accessor = accessor;
-                }
-
-                if (defaultLoader != null) {
-                    configItemInfo.defaultLoader = defaultLoader;
-                }
-
-                if (defaultValue != null) {
-                    configItemInfo.defaultValue = defaultValue;
-                }
-
-                return configItemInfo;
+                return parseAnnotation(Type.INT, annotation.defaultValue(), annotation.accessor(), annotation.defaultLoader());
             });
         }
 
-        if (elements1 != null && elements1.size() > 0) {
-            res |= handleAutoRegister(elements1, (VariableElement variableElement) -> {
-                ConfigItemInfo configItemInfo = new ConfigItemInfo();
-
-                String key = variableElement.getConstantValue().toString();
-                AutoRegisterToDefault annotation = variableElement.getAnnotation(AutoRegisterToDefault.class);
-                if(annotation == null){
-                    printMessageW("get AutoRegisterToDefault is null and annotation is " + variableElement);
+        if (elementsLong != null && elementsLong.size() > 0) {
+            res |= handleAutoRegister(elementsLong, (VariableElement variableElement) -> {
+                AutoRegisterLong annotation = variableElement.getAnnotation(AutoRegisterLong.class);
+                if (annotation == null) {
+                    printMessageW("get AutoRegisterLong is null");
                     return null;
                 }
-                AutoRegister.Type type = annotation.type();
-                String accessor = annotation.accessor();
-                String defaultValue = annotation.defaultValue();
-                String defaultLoader = annotation.defaultLoader();
-
-                if (key == null || key.isEmpty()) {
-                    printMessageE("handleAutoConfigRegister : the element's value is null --> " + variableElement.getSimpleName());
-                    return null;
-                }
-
-                configItemInfo.key = key;
-                configItemInfo.type = type;
-
-                if (accessor != null ) {
-                    configItemInfo.accessor = accessor;
-                }
-
-                if (defaultLoader != null) {
-                    configItemInfo.defaultLoader = defaultLoader;
-                }
-
-                if (defaultValue != null) {
-                    configItemInfo.defaultValue = defaultValue;
-                }
-
-                return configItemInfo;
+                return parseAnnotation(Type.LONG, annotation.defaultValue(), annotation.accessor(), annotation.defaultLoader());
             });
         }
+
+        if (elementsBoolean != null && elementsBoolean.size() > 0) {
+            res |= handleAutoRegister(elementsBoolean, (VariableElement variableElement) -> {
+                AutoRegisterBoolean annotation = variableElement.getAnnotation(AutoRegisterBoolean.class);
+                if (annotation == null) {
+                    printMessageW("get AutoRegisterBoolean is null");
+                    return null;
+                }
+                return parseAnnotation(Type.BOOLEAN, annotation.defaultValue(), annotation.accessor(), annotation.defaultLoader());
+            });
+        }
+
+        if (elementsFloat != null && elementsFloat.size() > 0) {
+            res |= handleAutoRegister(elementsFloat, (VariableElement variableElement) -> {
+                AutoRegisterFloat annotation = variableElement.getAnnotation(AutoRegisterFloat.class);
+                if (annotation == null) {
+                    printMessageW("get AutoRegisterFloat is null");
+                    return null;
+                }
+                return parseAnnotation(Type.FLOAT, annotation.defaultValue(), annotation.accessor(), annotation.defaultLoader());
+            });
+        }
+
+        if (elementsDouble != null && elementsDouble.size() > 0) {
+            res |= handleAutoRegister(elementsDouble, (VariableElement variableElement) -> {
+                AutoRegisterDouble annotation = variableElement.getAnnotation(AutoRegisterDouble.class);
+                if (annotation == null) {
+                    printMessageW("get AutoRegisterDouble is null");
+                    return null;
+                }
+                return parseAnnotation(Type.DOUBLE, annotation.defaultValue(), annotation.accessor(), annotation.defaultLoader());
+            });
+        }
+
+        if (elementsString != null && elementsString.size() > 0) {
+            res |= handleAutoRegister(elementsString, (VariableElement variableElement) -> {
+                AutoRegisterString annotation = variableElement.getAnnotation(AutoRegisterString.class);
+                if (annotation == null) {
+                    printMessageW("get AutoRegisterString is null");
+                    return null;
+                }
+                return parseAnnotation(Type.STRING, annotation.defaultValue(), annotation.accessor(), annotation.defaultLoader());
+            });
+        }
+
+
+        if (elementsIntDefault != null && elementsIntDefault.size() > 0) {
+            res |= handleAutoRegister(elementsIntDefault, (VariableElement variableElement) -> {
+                AutoRegisterIntWithDefault annotation = variableElement.getAnnotation(AutoRegisterIntWithDefault.class);
+                if (annotation == null) {
+                    printMessageW("get AutoRegisterString is null");
+                    return null;
+                }
+                return parseAnnotationWithDefault(Type.INT, 0);
+            });
+        }
+
+        if (elementsLongDefault != null && elementsLongDefault.size() > 0) {
+            res |= handleAutoRegister(elementsLongDefault, (VariableElement variableElement) -> {
+                AutoRegisterLongWithDefault annotation = variableElement.getAnnotation(AutoRegisterLongWithDefault.class);
+                if (annotation == null) {
+                    printMessageW("get elementsLongDefault is null");
+                    return null;
+                }
+                return parseAnnotationWithDefault(Type.LONG, 0L);
+            });
+        }
+
+        if (elementsFloatDefault != null && elementsFloatDefault.size() > 0) {
+            res |= handleAutoRegister(elementsFloatDefault, (VariableElement variableElement) -> {
+                AutoRegisterFloatWithDefault annotation = variableElement.getAnnotation(AutoRegisterFloatWithDefault.class);
+                if (annotation == null) {
+                    printMessageW("get AutoRegisterFloatWithDefault is null");
+                    return null;
+                }
+                return parseAnnotationWithDefault(Type.FLOAT, 0.0f);
+            });
+        }
+
+        if (elementsDoubleDefault != null && elementsDoubleDefault.size() > 0) {
+            res |= handleAutoRegister(elementsDoubleDefault, (VariableElement variableElement) -> {
+                AutoRegisterDoubleWithDefault annotation = variableElement.getAnnotation(AutoRegisterDoubleWithDefault.class);
+                if (annotation == null) {
+                    printMessageW("get AutoRegisterDoubleWithDefault is null");
+                    return null;
+                }
+                return parseAnnotationWithDefault(Type.DOUBLE, 0.0);
+            });
+        }
+
+        if (elementsBooleanDefault != null && elementsBooleanDefault.size() > 0) {
+            res |= handleAutoRegister(elementsBooleanDefault, (VariableElement variableElement) -> {
+                AutoRegisterBooleanWithDefault annotation = variableElement.getAnnotation(AutoRegisterBooleanWithDefault.class);
+                if (annotation == null) {
+                    printMessageW("get AutoRegisterBooleanWithDefault is null");
+                    return null;
+                }
+                return parseAnnotationWithDefault(Type.BOOLEAN, false);
+            });
+        }
+
+        if (elementsStringDefault != null && elementsStringDefault.size() > 0) {
+            res |= handleAutoRegister(elementsStringDefault, (VariableElement variableElement) -> {
+                AutoRegisterStringWithDefault annotation = variableElement.getAnnotation(AutoRegisterStringWithDefault.class);
+                if (annotation == null) {
+                    printMessageW("get AutoRegisterStringWithDefault is null");
+                    return null;
+                }
+                return parseAnnotationWithDefault(Type.STRING, "");
+            });
+        }
+
 
         return res;
+    }
 
+    private ConfigItemInfo parseAnnotation(Type type, Object defaultValue, String accessor, String loader) {
+        ConfigItemInfo configItemInfo = new ConfigItemInfo();
+
+        configItemInfo.type = type;
+        handleRegisterParam(configItemInfo, accessor, loader);
+
+        if (defaultValue != null) {
+            configItemInfo.defaultValue = defaultValue;
+        }
+
+        return configItemInfo;
+    }
+
+    private ConfigItemInfo parseAnnotationWithDefault(Type type, Object defaultValue) {
+        ConfigItemInfo configItemInfo = new ConfigItemInfo();
+
+        configItemInfo.type = type;
+        configItemInfo.defaultLoader = DEFAULT_LOADER;
+        configItemInfo.accessor = DEFAULT_ACCESSOR;
+        configItemInfo.defaultValue = defaultValue;
+
+        return configItemInfo;
+    }
+
+    private void handleRegisterParam(ConfigItemInfo configItemInfo, String accessor, String loader) {
+        configItemInfo.accessor = (accessor == null ? "" : accessor);
+        configItemInfo.defaultLoader = (loader == null ? "" : loader);
     }
 
     private boolean handleAutoRegister(Set<? extends Element> elements, Function<VariableElement, ConfigItemInfo> function) {
@@ -168,11 +321,19 @@ public class AutoConfigProcessor extends AbstractProcessor {
                 continue;
             }
 
-
             ConfigItemInfo configItemInfo = function.apply(variableElement);
-            if (configItemInfo != null) {
-                items.add(configItemInfo);
+
+            String key = variableElement.getConstantValue().toString();
+
+            if (key == null || key.isEmpty()) {
+                printMessageE("handleAutoConfigRegister : the element's value is null --> " + variableElement.getSimpleName());
+                continue;
             }
+
+            configItemInfo.key = key;
+
+            items.add(configItemInfo);
+
         }
 
         return true;
@@ -194,11 +355,41 @@ public class AutoConfigProcessor extends AbstractProcessor {
                 .addParameter(ParameterSpec.builder(autoConfig, "config").build());
 
         for (ConfigItemInfo configItemInfo : items) {
-            AutoConfig.Type type = TypeMap(configItemInfo.type);
-            registerKeyMethod.addStatement("config.register($S, $T.$L, $S, $S, $S)"
-                    , configItemInfo.key, ClassName.get("indi.arrowyi.autoconfig.configmanager.AutoConfig"
-                            , "Type"), type.name(), configItemInfo.accessor, configItemInfo.defaultLoader
-                    , configItemInfo.defaultValue);
+            switch (configItemInfo.type) {
+                case STRING:
+                    registerKeyMethod.addStatement("config.registerString($S, $S, $S, $S)"
+                            , configItemInfo.key, configItemInfo.accessor, configItemInfo.defaultLoader
+                            , configItemInfo.defaultValue);
+                    break;
+                case INT:
+                    registerKeyMethod.addStatement("config.registerInt($S, $S, $S, $L)"
+                            , configItemInfo.key, configItemInfo.accessor, configItemInfo.defaultLoader
+                            , configItemInfo.defaultValue);
+                    break;
+                case LONG:
+                    registerKeyMethod.addStatement("config.registerLong($S, $S, $S, $Ll)"
+                            , configItemInfo.key, configItemInfo.accessor, configItemInfo.defaultLoader
+                            , configItemInfo.defaultValue);
+                    break;
+                case BOOLEAN:
+                    registerKeyMethod.addStatement("config.registerBoolean($S, $S, $S, $L)"
+                            , configItemInfo.key, configItemInfo.accessor, configItemInfo.defaultLoader
+                            , configItemInfo.defaultValue);
+                    break;
+                case FLOAT:
+                    registerKeyMethod.addStatement("config.registerFloat($S, $S, $S, $Lf)"
+                            , configItemInfo.key, configItemInfo.accessor, configItemInfo.defaultLoader
+                            , configItemInfo.defaultValue);
+                    break;
+                case DOUBLE:
+                    registerKeyMethod.addStatement("config.registerDouble($S, $S, $S, $L)"
+                            , configItemInfo.key, configItemInfo.accessor, configItemInfo.defaultLoader
+                            , configItemInfo.defaultValue);
+                    break;
+                default:
+                    break;
+            }
+
         }
 
         commonSettingsDefBuilder.addMethod(registerKeyMethod.build());
@@ -215,25 +406,6 @@ public class AutoConfigProcessor extends AbstractProcessor {
         }
 
         return true;
-    }
-
-    private AutoConfig.Type TypeMap(AutoRegister.Type type) {
-        switch (type) {
-            case BOOLEAN:
-                return AutoConfig.Type.BOOLEAN;
-            case INT:
-                return AutoConfig.Type.INT;
-            case STRING:
-                return AutoConfig.Type.STRING;
-            case FLOAT:
-                return AutoConfig.Type.FLOAT;
-            case DOUBLE:
-                return AutoConfig.Type.DOUBLE;
-            case LONG:
-                return AutoConfig.Type.LONG;
-        }
-
-        return null;
     }
 
     private void printMessageW(String msg) {

@@ -1,3 +1,20 @@
+
+/*
+ * Copyright (c) 2022.  Arrowyi. All rights reserved
+ * email : arrowyi@gmail.com
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
 package indi.arrowyi.autoconfig.configmanager;
 
 import java.util.HashMap;
@@ -22,12 +39,18 @@ class ConfigSteward {
             if (curValue == null) {
                 ConfigAccessor accessor = flyweight.getConfigAccessor();
                 DefaultValueLoader loader = flyweight.getDefaultValueLoader();
+                ConfigLog.d(key + "'s accessor is " + accessor == null ? "null !!!" : "not null " + " and loader is "
+                        + loader == null ? "null !!!" : "not null");
 
                 if (defaultValue == null && loader == null) {
-                    throw new ConfigRuntimeException("both default value and loader are null");
+                    ConfigLog.e("both default value and loader are null --> " + key);
                 }
 
-                Object dv = defaultValue == null ? loader.getDefaultValue(key, flyweight.getType()) : defaultValue;
+                Object dv = loader != null ? loader.getDefaultValue(key, flyweight.getType()) : defaultValue;
+                if (dv == null) {
+                    ConfigLog.e("default value is null --> " + key);
+                    return null;
+                }
 
                 curValue = (accessor != null ? accessor.get(key, flyweight.getType(), dv) : dv);
             }
@@ -42,7 +65,7 @@ class ConfigSteward {
          * 2. the same with current value
          */
         int setValue(String key, Object value) {
-            if (checkValueType(flyweight.getType(), value)) {
+            if (flyweight.getType().isTypeOf(value)) {
                 ConfigLog.e("setValue : type is wrong --> " + key + " : " + value);
                 return 0;
             }
@@ -65,32 +88,15 @@ class ConfigSteward {
         }
 
         boolean reset(String key) {
-            if (defaultValue != null) {
-                curValue = defaultValue;
+            Object dv;
+            if (flyweight.getDefaultValueLoader() != null) {
+                dv = flyweight.getDefaultValueLoader().getDefaultValue(key, flyweight.getType());
             } else {
-                curValue = flyweight.getDefaultValueLoader().getDefaultValue(key, flyweight.getType());
+                dv = defaultValue;
             }
 
-            return true;
-        }
-
-        private boolean checkValueType(AutoConfig.Type type, Object value) {
-            switch (type) {
-                case INT:
-                    return value instanceof Integer;
-                case LONG:
-                    return value instanceof Long;
-                case FLOAT:
-                    return value instanceof Float;
-                case DOUBLE:
-                    return value instanceof Double;
-                case STRING:
-                    return value instanceof String;
-                case BOOLEAN:
-                    return value instanceof Boolean;
-                default:
-                    throw new ConfigRuntimeException("checkValueType : type is wrong " + type);
-            }
+            int res = setValue(key, dv);
+            return (res == 1 || res == 2);
         }
     }
 
@@ -99,20 +105,26 @@ class ConfigSteward {
 
 
     synchronized void register(String key, AutoConfig.Type type, String accessor, String defaultLoader
-            , String defaultValueStr, boolean overwrite) {
-        try {
-            Object dv = (defaultValueStr == null || defaultValueStr.isEmpty()) ? null : type.convertValue(defaultValueStr);
+            , Object defaultValue, boolean overwrite) {
 
-            if (dv == null && (defaultLoader == null || defaultLoader.isEmpty())) {
-                throw new ConfigRuntimeException("both default value and default loader are null!!!");
-            }
-
-            ConfigFlyweight configFlyweight = configFlyweightFactory.getInfo(type, (accessor != null ? accessor : "")
-                    , (dv != null ? "" : defaultLoader));
-            register(key, configFlyweight, dv, overwrite);
-        } catch (NumberFormatException e) {
-            throw new ConfigRuntimeException("register error : default value error : " + defaultValueStr, e);
+        if (key == null) {
+            ConfigLog.e("register key is null !!!");
+            return;
         }
+
+        if (defaultValue == null && (defaultLoader == null || defaultLoader.isEmpty())) {
+            ConfigLog.e("both default value and default loader are null!!! --> " + key);
+            return;
+        }
+
+        if (type == null || !type.isTypeOf(defaultValue)) {
+            ConfigLog.e("register type is null --> " + key);
+            return;
+        }
+
+        ConfigFlyweight configFlyweight = configFlyweightFactory.getInfo(type, (accessor != null ? accessor : "")
+                , (defaultLoader != null ? defaultLoader : ""));
+        register(key, configFlyweight, defaultValue, overwrite);
     }
 
     synchronized boolean isKeyDefined(String key) {
@@ -126,7 +138,7 @@ class ConfigSteward {
     AutoConfig.Type getKeyType(String key) {
         ConfigStuff stuff = keys.get(key);
         if (stuff == null) {
-            throw new ConfigRuntimeException("getKeyType error : key has not registered");
+            ConfigLog.e("getKeyType error : key has not registered");
         }
 
         return stuff.flyweight.getType();
@@ -144,7 +156,7 @@ class ConfigSteward {
     synchronized Object getValue(String key) {
         ConfigStuff stuff = keys.get(key);
         if (stuff == null) {
-            throw new ConfigRuntimeException("config " + key + "is not registered correctly!!!");
+            ConfigLog.e("config " + key + "is not registered correctly!!!");
         }
 
         return stuff.getValue(key);
@@ -160,7 +172,7 @@ class ConfigSteward {
 
     private void register(String key, ConfigFlyweight configFlyweight, Object defaultValue, boolean overwrite) {
         if (!overwrite && isKeyDefined(key)) {
-            throw new ConfigRuntimeException("the key : " + key + " has already defined !!");
+            ConfigLog.e("the key : " + key + " has already defined !!");
         }
 
         keys.put(key, new ConfigStuff(defaultValue, configFlyweight));
