@@ -42,12 +42,12 @@ class ConfigSteward {
                 ConfigLog.d(key + "'s accessor is " + accessor == null ? "null !!!" : "not null " + " and loader is "
                         + loader == null ? "null !!!" : "not null");
 
-                if (defaultValue == null && loader == null) {
+                if ((flyweight.getType() != AutoConfig.Type.OBJECT) && (defaultValue == null && loader == null)) {
                     ConfigLog.e("both default value and loader are null --> " + key);
                 }
 
                 Object dv = loader != null ? loader.getDefaultValue(key, flyweight.getType()) : defaultValue;
-                if (dv == null) {
+                if (dv == null && (flyweight.getType() != AutoConfig.Type.OBJECT)) {
                     ConfigLog.e("default value is null --> " + key);
                     return null;
                 }
@@ -112,12 +112,13 @@ class ConfigSteward {
             return;
         }
 
-        if (defaultValue == null && (defaultLoader == null || defaultLoader.isEmpty())) {
+        if ((type != AutoConfig.Type.OBJECT)
+                && (defaultValue == null && (defaultLoader == null || defaultLoader.isEmpty()))) {
             ConfigLog.e("both default value and default loader are null!!! --> " + key);
             return;
         }
 
-        if (type == null || !type.isTypeOf(defaultValue)) {
+        if (type == null || (type != AutoConfig.Type.OBJECT && !type.isTypeOf(defaultValue))) {
             ConfigLog.e("register type is null --> " + key);
             return;
         }
@@ -150,6 +151,10 @@ class ConfigSteward {
      * 2. the same with current value
      */
     synchronized int setValue(String key, Object value) {
+        if (!isKeyDefined(key)) {
+            ConfigLog.e("setValue " + key + "is not registered!!!");
+            return 0;
+        }
         return keys.get(key).setValue(key, value);
     }
 

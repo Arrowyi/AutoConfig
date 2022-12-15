@@ -17,10 +17,7 @@
 
 package indi.arrowyi.autoconfig.configmanager;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.ServiceLoader;
+import java.util.*;
 import java.util.concurrent.*;
 
 public final class AutoConfig {
@@ -33,11 +30,6 @@ public final class AutoConfig {
             boolean isTypeOf(Object value) {
                 return value instanceof Integer;
             }
-
-            @Override
-            Integer convertValue(String value) {
-                return Integer.valueOf(value);
-            }
         },
         BOOLEAN(1) {
             @Override
@@ -45,20 +37,11 @@ public final class AutoConfig {
                 return value instanceof Boolean;
             }
 
-            @Override
-            Boolean convertValue(String value) {
-                return Boolean.valueOf(value);
-            }
         },
         STRING(2) {
             @Override
             boolean isTypeOf(Object value) {
                 return value instanceof String;
-            }
-
-            @Override
-            String convertValue(String value) {
-                return value;
             }
         },
         LONG(3) {
@@ -66,21 +49,11 @@ public final class AutoConfig {
             boolean isTypeOf(Object value) {
                 return value instanceof Long;
             }
-
-            @Override
-            Long convertValue(String value) {
-                return Long.valueOf(value);
-            }
         },
         FLOAT(4) {
             @Override
             boolean isTypeOf(Object value) {
                 return value instanceof Float;
-            }
-
-            @Override
-            Float convertValue(String value) {
-                return Float.valueOf(value);
             }
         },
 
@@ -89,11 +62,14 @@ public final class AutoConfig {
             boolean isTypeOf(Object value) {
                 return value instanceof Double;
             }
+        },
 
+        OBJECT(6) {
             @Override
-            Double convertValue(String value) {
-                return Double.valueOf(value);
+            boolean isTypeOf(Object value) {
+                return value != null;
             }
+
         };
 
         private int value;
@@ -108,7 +84,6 @@ public final class AutoConfig {
 
         abstract boolean isTypeOf(Object value);
 
-        abstract Object convertValue(String value);
     }
 
     public interface ConfigChangedListener {
@@ -123,9 +98,12 @@ public final class AutoConfig {
     public static void init(AutoConfigLog log) {
         ConfigLog.autoConfigLog = log;
         sInstance = new AutoConfig();
+    }
+
+    public static void loadConfigRegister() {
         ServiceLoader<ConfigRegister> load = ServiceLoader.load(ConfigRegister.class);
         load.forEach(register -> {
-            register.register(AutoConfig.sInstance);
+            AutoConfig.sInstance.runRegister(register);
         });
     }
 
@@ -176,12 +154,40 @@ public final class AutoConfig {
         sInstance.doRegister(key, Type.STRING, accessor, defaultLoader, (String) defaultValue);
     }
 
-    public static boolean set(String key, Object value) {
+    public static void registerObject(String key, String accessor, String defaultLoader, Object defaultValue) {
+        sInstance.doRegister(key, Type.OBJECT, accessor, defaultLoader, defaultValue);
+    }
+
+    private static boolean set(String key, Object value) {
         return sInstance.doSet(key, value);
     }
 
     public static boolean setInt(String key, int value) {
         return set(key, Integer.valueOf(value));
+    }
+
+    public static boolean setLong(String key, long value) {
+        return set(key, Long.valueOf(value));
+    }
+
+    public static boolean setFloat(String key, float value) {
+        return set(key, Float.valueOf(value));
+    }
+
+    public static boolean setDouble(String key, double value) {
+        return set(key, Double.valueOf(value));
+    }
+
+    public static boolean setBoolean(String key, boolean value) {
+        return set(key, Boolean.valueOf(value));
+    }
+
+    public static boolean setString(String key, String value) {
+        return set(key, value);
+    }
+
+    public static boolean setObject(String key, Object value) {
+        return set(key, value);
     }
 
     public static Object get(String key) {
@@ -191,6 +197,31 @@ public final class AutoConfig {
     public static int getInt(String key) {
         return (Integer) get(key);
     }
+
+    public static long getLong(String key) {
+        return (Long) get(key);
+    }
+
+    public static float getFloat(String key) {
+        return (Float) get(key);
+    }
+
+    public static double getDouble(String key) {
+        return (Double) get(key);
+    }
+
+    public static boolean getBoolean(String key) {
+        return (Boolean) get(key);
+    }
+
+    public static String getString(String key) {
+        return (String) get(key);
+    }
+
+    public static Object getObject(String key) {
+        return get(key);
+    }
+
 
     public static boolean isKeyDefined(String key) {
         return sInstance.doIsKeyDefined(key);
@@ -212,6 +243,21 @@ public final class AutoConfig {
             new SynchronousQueue<Runnable>());
 
     static final ConfigSteward steward = new ConfigSteward();
+
+    private Set<Class<?>> registers = new HashSet<>();
+
+    private boolean checkRegisterHasRan(Class<?> registerClass) {
+        return registers.contains(registerClass);
+    }
+
+    private void runRegister(ConfigRegister register) {
+        if (checkRegisterHasRan(register.getClass())) {
+            return;
+        }
+
+        register.register(this);
+        registers.add(register.getClass());
+    }
 
     private void doAddChangedListener(String key, ConfigChangedListener listener) {
 
@@ -252,6 +298,10 @@ public final class AutoConfig {
 
     private void doRegister(String key, AutoConfig.Type type, String accessor, String defaultLoader
             , Object defaultValue) {
+        if (defaultLoader != null && !defaultLoader.isEmpty()) {
+            defaultValue = null;
+        }
+
         steward.register(key, type, accessor, defaultLoader, defaultValue, false);
     }
 

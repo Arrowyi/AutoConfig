@@ -36,10 +36,10 @@ public class AutoConfigTest {
         test.testTestConfig();
     }
     public void testTestConfig(){
-        System.out.println("config value is " + AutoConfig.get(TEST_INT));
-        System.out.println(AutoConfig.get(TEST_DOUIBLE));
-        System.out.println(AutoConfig.get(TEST_BOOLEAN));
-        System.out.println(AutoConfig.get(TEST_STRING));
+        System.out.println("config value is " + AutoConfig.getInt(TEST_INT));
+        System.out.println(AutoConfig.getDouble(TEST_DOUIBLE));
+        System.out.println(AutoConfig.getBoolean(TEST_BOOLEAN));
+        System.out.println(AutoConfig.getString(TEST_STRING));
 
         AutoConfig.registerAccessor(AutoConfig.DEFAULT_ACCESSOR, new ConfigAccessor() {
             @Override
@@ -71,12 +71,12 @@ public class AutoConfigTest {
             }
         });
 
-        AutoConfig.get(TEST_INT_DEFAULT);
-        System.out.println(AutoConfig.get(TEST_INT_DEFAULT));
+        AutoConfig.getInt(TEST_INT_DEFAULT);
+        System.out.println(AutoConfig.getInt(TEST_INT_DEFAULT));
 
-        System.out.println(AutoConfig.get(TEST_FLOAT_DEFAULT));
-        System.out.println(AutoConfig.get(TEST_BOOLEAN_DEFAULT));
-        System.out.println(AutoConfig.get(TEST_STRING_DEFAULT));
+        System.out.println(AutoConfig.getFloat(TEST_FLOAT_DEFAULT));
+        System.out.println(AutoConfig.getBoolean(TEST_BOOLEAN_DEFAULT));
+        System.out.println(AutoConfig.getString(TEST_STRING_DEFAULT));
 
 
     }
