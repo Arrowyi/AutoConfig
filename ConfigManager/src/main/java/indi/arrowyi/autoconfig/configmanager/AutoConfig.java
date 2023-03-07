@@ -203,7 +203,12 @@ public final class AutoConfig {
     }
 
     public static float getFloat(String key) {
-        return (Float) get(key);
+        Object value = get(key);
+        if (value instanceof Double) {
+            return ((Double) value).floatValue();
+        }
+
+        return (Float) value;
     }
 
     public static double getDouble(String key) {
@@ -298,6 +303,7 @@ public final class AutoConfig {
 
     private void doRegister(String key, AutoConfig.Type type, String accessor, String defaultLoader
             , Object defaultValue) {
+        //if has the defaultloader, no need to use default value
         if (defaultLoader != null && !defaultLoader.isEmpty()) {
             defaultValue = null;
         }

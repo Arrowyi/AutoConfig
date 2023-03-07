@@ -32,6 +32,7 @@ public class AutoConfigTest {
 
     public static void main(String[] args){
         AutoConfig.init(null);
+        AutoConfig.loadConfigRegister();
         AutoConfigTest test = new AutoConfigTest();
         test.testTestConfig();
     }
@@ -39,6 +40,8 @@ public class AutoConfigTest {
         System.out.println("config value is " + AutoConfig.getInt(TEST_INT));
         System.out.println(AutoConfig.getDouble(TEST_DOUIBLE));
         System.out.println(AutoConfig.getBoolean(TEST_BOOLEAN));
+        System.out.println(AutoConfig.getString(TEST_STRING));
+        AutoConfig.setString(TEST_STRING, "test");
         System.out.println(AutoConfig.getString(TEST_STRING));
 
         AutoConfig.registerAccessor(AutoConfig.DEFAULT_ACCESSOR, new ConfigAccessor() {
@@ -62,7 +65,7 @@ public class AutoConfigTest {
                 switch (type){
                     case INT:return 1;
                     case LONG:return 3;
-                    case FLOAT:return 0.4;
+                    case FLOAT:return 0.4f;
                     case DOUBLE:return 0.6;
                     case BOOLEAN:return true;
                     case STRING:return "test_aa";

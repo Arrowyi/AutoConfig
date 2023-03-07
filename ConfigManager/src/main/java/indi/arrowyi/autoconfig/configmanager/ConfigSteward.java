@@ -65,7 +65,7 @@ class ConfigSteward {
          * 2. the same with current value
          */
         int setValue(String key, Object value) {
-            if (flyweight.getType().isTypeOf(value)) {
+            if (!flyweight.getType().isTypeOf(value)) {
                 ConfigLog.e("setValue : type is wrong --> " + key + " : " + value);
                 return 0;
             }
@@ -118,7 +118,7 @@ class ConfigSteward {
             return;
         }
 
-        if (type == null || (type != AutoConfig.Type.OBJECT && !type.isTypeOf(defaultValue))) {
+        if (type == null || (type != AutoConfig.Type.OBJECT && defaultValue != null && !type.isTypeOf(defaultValue))) {
             ConfigLog.e("register type is null --> " + key);
             return;
         }
