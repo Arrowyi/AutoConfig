@@ -32,7 +32,7 @@ public class AutoConfigTest {
 
     public static void main(String[] args){
         AutoConfig.init(null);
-        AutoConfig.loadConfigRegister();
+        AutoConfig.loadConfigRegister(null);
         AutoConfigTest test = new AutoConfigTest();
         test.testTestConfig();
     }

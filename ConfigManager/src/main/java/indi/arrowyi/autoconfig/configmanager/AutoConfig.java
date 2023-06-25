@@ -95,13 +95,23 @@ public final class AutoConfig {
     private AutoConfig() {
     }
 
-    public static void init(AutoConfigLog log) {
+    public static synchronized void init(AutoConfigLog log) {
+        if (sInstance != null) {
+            return;
+        }
+
         ConfigLog.autoConfigLog = log;
         sInstance = new AutoConfig();
     }
 
     public static void loadConfigRegister() {
-        ServiceLoader<ConfigRegister> load = ServiceLoader.load(ConfigRegister.class);
+        loadConfigRegister(null);
+    }
+
+    //if the loader is null, will use the current thread context loader
+    public static void loadConfigRegister(ClassLoader loader) {
+        ServiceLoader<ConfigRegister> load = (loader == null ? ServiceLoader.load(ConfigRegister.class)
+                : ServiceLoader.load(ConfigRegister.class, loader));
         load.forEach(register -> {
             AutoConfig.sInstance.runRegister(register);
         });
