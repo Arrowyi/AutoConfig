@@ -37,6 +37,8 @@ import static indi.arrowyi.autoconfig.configmanager.AutoConfig.DEFAULT_LOADER;
 class FieldProcessor {
     private final AutoConfigProcessor utils;
 
+    String moduleName = null;
+
     FieldProcessor(AutoConfigProcessor utils) {
         this.utils = utils;
     }
@@ -289,9 +291,39 @@ class FieldProcessor {
 
             configItemInfo.key = key;
 
+            if ((configItemInfo.defaultLoader == null || configItemInfo.defaultLoader.isEmpty()) && configItemInfo.defaultValue == null) {
+                utils.printMessageE("handleAutoConfigRegister : the element's default loader is null and default value is null --> "
+                        + variableElement.getSimpleName());
+                continue;
+
+            }
+
             items.add(configItemInfo);
 
+            determineModuleName(element);
         }
+
+    }
+
+    private void determineModuleName(Element element) {
+        if (moduleName != null) {
+            return;
+        }
+
+        Element curElement = element;
+        Element enclosingElement = element.getEnclosingElement();
+        while (enclosingElement != null && enclosingElement.getSimpleName() != null
+                && !(enclosingElement.getSimpleName().toString().isEmpty())) {
+            curElement = enclosingElement;
+            enclosingElement = enclosingElement.getEnclosingElement();
+            utils.printMessageW("gbd test cur element name is " + curElement.getSimpleName());
+        }
+
+        utils.printMessageW("finally the gbd test cur element name is " + curElement.getSimpleName());
+
+        moduleName = curElement.getSimpleName().toString();
+
+        utils.printMessageW("finally the module name is  " + moduleName);
 
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022.  Arrowyi. All rights reserved
+ * Copyright (c) 2023.  Arrowyi. All rights reserved
  * email : arrowyi@gmail.com
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,7 +21,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.FIELD)
-@Retention(RetentionPolicy.CLASS)
-public @interface AutoRegisterLongWithDefault {
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface AutoRegister {
+    String[] contains();
 }

@@ -23,7 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Target(ElementType.FIELD)
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 public @interface AutoRegisterFloat {
     float defaultValue() default 0.0f;
     String accessor() default "";

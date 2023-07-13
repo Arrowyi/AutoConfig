@@ -62,16 +62,7 @@ public final class AutoConfig {
             boolean isTypeOf(Object value) {
                 return value instanceof Double;
             }
-        },
-
-        OBJECT(6) {
-            @Override
-            boolean isTypeOf(Object value) {
-                return value != null;
-            }
-
         };
-
         private int value;
 
         Type(int value) {
@@ -134,38 +125,32 @@ public final class AutoConfig {
         sInstance.doRegisterDefaultValueLoader(name, loader);
     }
 
-    public static void registerInt(String key, String accessor, String defaultLoader
-            , int defaultValue) {
-        sInstance.doRegister(key, Type.INT, accessor, defaultLoader, Integer.valueOf(defaultValue));
+    public static void registerInt(String key, String accessor, String defaultLoader) {
+        register(key, Type.INT, accessor, defaultLoader);
     }
 
-    public static void registerLong(String key, String accessor, String defaultLoader
-            , long defaultValue) {
-        sInstance.doRegister(key, Type.LONG, accessor, defaultLoader, Long.valueOf(defaultValue));
+    public static void registerLong(String key, String accessor, String defaultLoader) {
+        register(key, Type.LONG, accessor, defaultLoader);
     }
 
-    public static void registerBoolean(String key, String accessor, String defaultLoader
-            , boolean defaultValue) {
-        sInstance.doRegister(key, Type.BOOLEAN, accessor, defaultLoader, Boolean.valueOf(defaultValue));
+    public static void registerBoolean(String key, String accessor, String defaultLoader) {
+        register(key, Type.BOOLEAN, accessor, defaultLoader);
     }
 
-    public static void registerFloat(String key, String accessor, String defaultLoader
-            , float defaultValue) {
-        sInstance.doRegister(key, Type.FLOAT, accessor, defaultLoader, Float.valueOf(defaultValue));
+    public static void registerFloat(String key, String accessor, String defaultLoader) {
+        register(key, Type.FLOAT, accessor, defaultLoader);
     }
 
-    public static void registerDouble(String key, String accessor, String defaultLoader
-            , double defaultValue) {
-        sInstance.doRegister(key, Type.DOUBLE, accessor, defaultLoader, Double.valueOf(defaultValue));
+    public static void registerDouble(String key, String accessor, String defaultLoader) {
+        register(key, Type.DOUBLE, accessor, defaultLoader);
     }
 
-    public static void registerString(String key, String accessor, String defaultLoader
-            , Object defaultValue) {
-        sInstance.doRegister(key, Type.STRING, accessor, defaultLoader, (String) defaultValue);
+    public static void registerString(String key, String accessor, String defaultLoader) {
+        register(key, Type.STRING, accessor, defaultLoader);
     }
 
-    public static void registerObject(String key, String accessor, String defaultLoader, Object defaultValue) {
-        sInstance.doRegister(key, Type.OBJECT, accessor, defaultLoader, defaultValue);
+    private static void register(String key, Type type, String accessor, String defaultLoader){
+        sInstance.doRegister(key, type, accessor, defaultLoader);
     }
 
     private static boolean set(String key, Object value) {
@@ -193,10 +178,6 @@ public final class AutoConfig {
     }
 
     public static boolean setString(String key, String value) {
-        return set(key, value);
-    }
-
-    public static boolean setObject(String key, Object value) {
         return set(key, value);
     }
 
@@ -232,11 +213,6 @@ public final class AutoConfig {
     public static String getString(String key) {
         return (String) get(key);
     }
-
-    public static Object getObject(String key) {
-        return get(key);
-    }
-
 
     public static boolean isKeyDefined(String key) {
         return sInstance.doIsKeyDefined(key);
@@ -311,14 +287,8 @@ public final class AutoConfig {
         steward.configFlyweightFactory.registerDefaultLoader(name, loader);
     }
 
-    private void doRegister(String key, AutoConfig.Type type, String accessor, String defaultLoader
-            , Object defaultValue) {
-        //if has the defaultloader, no need to use default value
-        if (defaultLoader != null && !defaultLoader.isEmpty()) {
-            defaultValue = null;
-        }
-
-        steward.register(key, type, accessor, defaultLoader, defaultValue, false);
+    private void doRegister(String key, AutoConfig.Type type, String accessor, String defaultLoader) {
+        steward.register(key, type, accessor, defaultLoader, false);
     }
 
 

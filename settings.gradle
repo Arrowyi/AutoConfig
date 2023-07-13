@@ -5,5 +5,5 @@ include ':Tester'
 project(':ConfigManager').projectDir = new File(rootProject.projectDir, "./ConfigManager")
 
 project(':Tester').projectDir = new File(rootProject.projectDir, "./Tester")
-
+include 'DependancyTest'
 

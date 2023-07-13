@@ -16,6 +16,7 @@
 
 package indi.arrowyi.autoconfig.configcomplier;
 
+import indi.arrowyi.autoconfig.AutoRegister;
 import indi.arrowyi.autoconfig.AutoRegisterAccessor;
 import indi.arrowyi.autoconfig.AutoRegisterDefaultLoader;
 
@@ -26,6 +27,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -65,6 +67,34 @@ public class ClassProcessor {
             AutoRegisterDefaultLoader autoRegisterAccessor = typeElement.getAnnotation(AutoRegisterDefaultLoader.class);
             return autoRegisterAccessor.value();
         });
+    }
+
+    Set<String> processRegisterAnnotation(RoundEnvironment roundEnvironment
+            , ProcessingEnvironment processingEnv) {
+
+        Set<? extends Element> elementsLoader = roundEnvironment.getElementsAnnotatedWith(AutoRegister.class);
+        utils.printMessageW("AutoRegisterElements size is " + elementsLoader.size());
+
+        TypeMirror configRegister = processingEnv.getElementUtils()
+                .getTypeElement("indi.arrowyi.autoconfig.configmanager.ConfigRegister").asType();
+
+        Set<String> containsSet = new HashSet();
+        for (Element element : elementsLoader) {
+            if (!checkElement(element, processingEnv, configRegister)) {
+                continue;
+            }
+
+            TypeElement typeElement = (TypeElement) element;
+            AutoRegister autoRegister = typeElement.getAnnotation(AutoRegister.class);
+            String[] contains = autoRegister.contains();
+            for (String contain : contains) {
+                containsSet.add(contain);
+            }
+        }
+
+        return containsSet;
+
+
     }
 
 
